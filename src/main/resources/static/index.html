@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicio - Mi Plata</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Poppins:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app dashboard">
+
+    <!-- Fila superior -->
+    <section class="fila fila-superior">
+      <div class="tarjeta tarjeta-logo">
+        <h2 class="logo-titulo">MI PLATA</h2>
+        <p class="logo-subtitulo">APP<br>FINANCIERA</p>
+        <small class="logo-lema">TU DINERO, MÁS ORGANIZADO</small>
+      </div>
+
+      <a href="movimientos.html" class="tarjeta tarjeta-rosa">
+        <h3>MOVIMIENTOS</h3>
+        <p>Consulta tu historial</p>
+        <span class="flecha">&rarr;</span>
+      </a>
+
+      <a href="ingresar.html" class="tarjeta tarjeta-rosa">
+        <h3>INGRESAR DINERO</h3>
+        <p>Registrar ingreso</p>
+        <span class="flecha">&rarr;</span>
+      </a>
+    </section>
+
+    <!-- Fila inferior -->
+    <section class="fila fila-inferior">
+      <a href="gastos.html" class="tarjeta tarjeta-verde">
+        <h3>REGISTRAR<br>GASTOS</h3>
+        <p>Anotar tus compras</p>
+        <span class="flecha">&rarr;</span>
+      </a>
+
+      <a href="estadistica.html" class="tarjeta tarjeta-rosa">
+        <h3>ESTADISTICA</h3>
+        <p>Ver en qué gastas</p>
+        <span class="flecha">&rarr;</span>
+      </a>
+
+      <a href="categorias.html" class="tarjeta tarjeta-verde">
+        <span class="nuevo">NEW</span>
+        <h3>CATEGORIAS</h3>
+        <p>Organizar movimientos</p>
+        <span class="flecha">&rarr;</span>
+      </a>
+
+      <div class="saldo">
+        <p class="saldo-titulo">SALDO<br>DISPONIBLE</p>
+        <p class="saldo-monto" id="saldo">$ 0,00</p>
+        <p class="saldo-nota">Se actualiza con tus movimientos guardados</p>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="js/api.js"></script>
+<script>
+    // Si no hay sesión, vuelve al inicio de sesión
+    if (!localStorage.getItem(CLAVE_TOKEN)) {
+      window.location.href = 'inicio2.html';
+    }
+
+    function formatearMonto(numero) {
+      return '$ ' + Number(numero).toLocaleString('es-AR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    async function mostrarSaldo() {
+      try {
+        const resumen = await api('/resumen');
+        document.getElementById('saldo').textContent = formatearMonto(resumen.saldo);
+      } catch (error) {
+        document.getElementById('saldo').textContent = '$ 0,00';
+      }
+    }
+
+    mostrarSaldo();
+    window.addEventListener('pageshow', mostrarSaldo);
+</script>
+</body>
+</html>

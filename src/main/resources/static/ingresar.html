@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ingresar dinero - Mi Plata</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Poppins:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app pagina">
+
+    <div class="pagina-top">
+      <a href="index.html" class="tarjeta-volver">
+        <span class="flecha-doble">&gt;&gt;&gt;</span>
+        <h3>INGRESAR DINERO</h3>
+        <p>Registrar ingreso</p>
+      </a>
+    </div>
+
+    <form id="form-ingreso" class="form-ingreso" novalidate>
+
+      <div class="campo" id="campo-fecha">
+        <label for="fecha">Fecha</label>
+        <input type="date" id="fecha">
+        <span class="error-campo" id="error-fecha"></span>
+      </div>
+
+      <div class="campo" id="campo-descripcion">
+        <label for="descripcion">Descripción</label>
+        <input type="text" id="descripcion" placeholder="Ej: Sueldo, Venta de ropa">
+        <span class="error-campo" id="error-descripcion"></span>
+      </div>
+
+      <div class="campo" id="campo-categoria">
+        <label for="categoria">Categoría</label>
+        <select id="categoria"></select>
+        <span class="error-campo" id="error-categoria"></span>
+      </div>
+
+      <div class="campo" id="campo-importe">
+        <label for="importe">Importe</label>
+        <div class="campo-importe">
+          <span class="signo">$</span>
+          <input type="text" id="importe" inputmode="numeric" placeholder="0">
+        </div>
+        <span class="error-campo" id="error-importe"></span>
+      </div>
+
+      <button type="submit" class="btn-guardar">Guardar ingreso</button>
+      <p class="mensaje" id="mensaje"></p>
+    </form>
+
+  </div>
+
+  <script src="js/api.js"></script>
+<script>
+    // Si no hay sesión, vuelve al inicio de sesión
+    if (!localStorage.getItem(CLAVE_TOKEN)) {
+      window.location.href = 'inicio2.html';
+    }
+
+    const form = document.getElementById('form-ingreso');
+    const mensaje = document.getElementById('mensaje');
+    const fecha = document.getElementById('fecha');
+    const descripcion = document.getElementById('descripcion');
+    const categoria = document.getElementById('categoria');
+    const importe = document.getElementById('importe');
+
+    function hoyISO() {
+      const hoy = new Date();
+      const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+      const dia = String(hoy.getDate()).padStart(2, '0');
+      return `${hoy.getFullYear()}-${mes}-${dia}`;
+    }
+
+    function escaparHTML(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto;
+      return div.innerHTML;
+    }
+
+    // Trae las categorías de ingreso desde el backend
+    async function cargarCategorias() {
+      try {
+        const datos = await api('/categorias');
+        const todas = [...datos.predefinidas.Ingreso, ...datos.propias
+          .filter(c => c.tipo === 'Ingreso')
+          .map(c => c.nombre)];
+
+        const valorActual = categoria.value;
+        categoria.innerHTML = '<option value="">Elegí una categoría</option>' +
+          todas.map(n => `<option value="${escaparHTML(n)}">${escaparHTML(n)}</option>`).join('');
+
+        if (todas.includes(valorActual)) categoria.value = valorActual;
+      } catch (error) {
+        mensaje.classList.add('error');
+        mensaje.textContent = error.message;
+      }
+    }
+
+    // Deja solo números y agrega separador de miles mientras escribe
+    importe.addEventListener('input', () => {
+      const digitos = importe.value.replace(/\D/g, '');
+      importe.value = digitos ? Number(digitos).toLocaleString('es-AR') : '';
+    });
+
+    // Convierte "500.000" en 500000
+    function leerImporte() {
+      return Number(importe.value.replace(/\./g, ''));
+    }
+
+    const reglas = {
+      fecha: {
+        input: fecha,
+        validar: v => v === '' ? 'Elegí una fecha.' : ''
+      },
+      descripcion: {
+        input: descripcion,
+        validar: v => v.trim() === '' ? 'Escribí una descripción.' : ''
+      },
+      categoria: {
+        input: categoria,
+        validar: v => v === '' ? 'Elegí una categoría.' : ''
+      },
+      importe: {
+        input: importe,
+        validar: () => {
+          const monto = leerImporte();
+          if (importe.value.trim() === '') return 'Ingresá un importe.';
+          if (monto <= 0) return 'El importe tiene que ser mayor a cero.';
+          return '';
+        }
+      }
+    };
+
+    function validarCampo(nombre) {
+      const regla = reglas[nombre];
+      const msg = regla.validar(regla.input.value);
+      document.getElementById('error-' + nombre).textContent = msg;
+      document.getElementById('campo-' + nombre).classList.toggle('invalido', msg !== '');
+      return msg === '';
+    }
+
+    Object.keys(reglas).forEach(nombre => {
+      const input = reglas[nombre].input;
+      input.addEventListener('blur', () => validarCampo(nombre));
+      input.addEventListener('change', () => {
+        if (document.getElementById('campo-' + nombre).classList.contains('invalido')) {
+          validarCampo(nombre);
+        }
+      });
+    });
+
+    fecha.value = hoyISO();
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      mensaje.textContent = '';
+      mensaje.className = 'mensaje';
+
+      let valido = true;
+      Object.keys(reglas).forEach(nombre => {
+        if (!validarCampo(nombre)) valido = false;
+      });
+
+      if (!valido) {
+        mensaje.classList.add('error');
+        mensaje.textContent = 'Revisá los campos marcados.';
+        return;
+      }
+
+      const boton = form.querySelector('button');
+      boton.disabled = true;
+      try {
+        await api('/movimientos', {
+          metodo: 'POST',
+          datos: {
+            fecha: fecha.value,
+            descripcion: descripcion.value.trim(),
+            categoria: categoria.value,
+            tipo: 'Ingreso',
+            importe: leerImporte()
+          }
+        });
+
+        // Limpiar para cargar otro ingreso
+        form.reset();
+        fecha.value = hoyISO();
+        Object.keys(reglas).forEach(nombre => {
+          document.getElementById('error-' + nombre).textContent = '';
+          document.getElementById('campo-' + nombre).classList.remove('invalido');
+        });
+
+        mensaje.classList.add('ok');
+        mensaje.textContent = 'Ingreso guardado';
+      } catch (error) {
+        mensaje.classList.add('error');
+        mensaje.textContent = error.message;
+      } finally {
+        boton.disabled = false;
+      }
+    });
+
+    cargarCategorias();
+    window.addEventListener('pageshow', cargarCategorias);
+</script>
+</body>
+</html>

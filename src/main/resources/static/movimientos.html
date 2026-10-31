@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movimientos - Mi Plata</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Poppins:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app pagina">
+
+    <div class="pagina-top">
+      <a href="index.html" class="tarjeta-volver">
+        <span class="flecha-doble">&gt;&gt;&gt;</span>
+        <h3>MOVIMIENTOS</h3>
+        <p>Consulta tu historial</p>
+      </a>
+
+      <div class="buscador">
+        <svg class="lupa" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round">
+          <circle cx="14" cy="10" r="7"></circle>
+          <line x1="9" y1="15" x2="3" y2="21"></line>
+        </svg>
+        <input type="text" id="buscar" placeholder="Buscar movimientos">
+      </div>
+    </div>
+
+    <div class="tabla-wrap">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Descripción</th>
+            <th>Categoría</th>
+            <th>Tipo</th>
+            <th class="importe">Importe</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-tabla"></tbody>
+      </table>
+      <p class="vacio" id="vacio">No hay movimientos todavía.</p>
+    </div>
+
+  </div>
+
+  <script src="js/api.js"></script>
+<script>
+    // Si no hay sesión, vuelve al inicio de sesión
+    if (!localStorage.getItem(CLAVE_TOKEN)) {
+      window.location.href = 'inicio2.html';
+    }
+
+    const cuerpo = document.getElementById('cuerpo-tabla');
+    const vacio = document.getElementById('vacio');
+    const buscar = document.getElementById('buscar');
+
+    function formatearMonto(numero) {
+      return '$ ' + Number(numero).toLocaleString('es-AR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+    }
+
+    // "2026-10-28" -> "28/10/2026"
+    function formatearFecha(iso) {
+      const [anio, mes, dia] = iso.split('-');
+      return `${dia}/${mes}/${anio}`;
+    }
+
+    function escapar(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto;
+      return div.innerHTML;
+    }
+
+    async function dibujarTabla() {
+      const termino = buscar.value.trim();
+
+      try {
+        const movimientos = await api('/movimientos?q=' + encodeURIComponent(termino));
+
+        if (movimientos.length === 0) {
+          cuerpo.innerHTML = '';
+          vacio.textContent = termino
+            ? 'No se encontraron movimientos con esa búsqueda.'
+            : 'No hay movimientos todavía.';
+          vacio.style.display = 'block';
+          return;
+        }
+
+        vacio.style.display = 'none';
+        cuerpo.innerHTML = movimientos.map(m => `
+          <tr>
+            <td>${formatearFecha(m.fecha)}</td>
+            <td>${escapar(m.descripcion)}</td>
+            <td>${escapar(m.categoria)}</td>
+            <td class="${m.tipo === 'Ingreso' ? 'tipo-ingreso' : 'tipo-gasto'}">${escapar(m.tipo)}</td>
+            <td class="importe">${formatearMonto(m.importe)}</td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        vacio.textContent = error.message;
+        vacio.style.display = 'block';
+      }
+    }
+
+    // Espera a que el usuario deje de escribir antes de buscar
+    let temporizador;
+    buscar.addEventListener('input', () => {
+      clearTimeout(temporizador);
+      temporizador = setTimeout(dibujarTabla, 300);
+    });
+
+    window.addEventListener('pageshow', dibujarTabla);
+
+    dibujarTabla();
+</script>
+</body>
+</html>

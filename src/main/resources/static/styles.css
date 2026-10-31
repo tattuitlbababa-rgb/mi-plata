@@ -1,0 +1,742 @@
+ * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f2f4f7;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+.app {
+  width: 100%;
+  max-width: 1010px;
+  min-height: 565px;
+  background: #b5e1e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding-bottom: 40px;
+}
+
+/* Barra superior */
+.header {
+  background: #bdf27a;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 14px;
+}
+
+.logo {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 34px;
+  color: #000;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+}
+
+.slogan {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 20px;
+  letter-spacing: 2px;
+  color: #111;
+}
+
+/* Formulario */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 18px;
+}
+
+h1 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 32px;
+  color: #000;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+form {
+  width: 183px;
+}
+
+.form-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.form-group.spaced {
+  margin-top: 18px;
+}
+
+label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #111;
+  margin-bottom: 4px;
+}
+
+input {
+  width: 100%;
+  height: 34px;
+  border: 1px solid #222;
+  background: #fff;
+  padding: 0 12px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  color: #111;
+  outline: none;
+}
+
+input:focus {
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
+}
+
+input.invalid {
+  border: 1px solid #c0392b;
+  background: #fff5f5;
+}
+
+.error {
+  font-size: 10px;
+  color: #c0392b;
+  margin-top: 3px;
+  min-height: 13px;
+}
+
+.btn {
+  margin-top: 22px;
+  width: 119px;
+  height: 31px;
+  background: #000;
+  color: #fff;
+  border: none;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  cursor: pointer;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.btn:hover {
+  background: #222;
+}
+
+.success {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: #1e7b34;
+  min-height: 16px;
+}
+/* Subtítulo (pantalla de inicio de sesión) */
+.subtitle {
+  text-align: center;
+  font-size: 11px;
+  color: #111;
+  margin-bottom: 26px;
+} 
+/* ===== Panel principal (index.html) ===== */
+.dashboard {
+  padding: 30px 40px;
+  min-height: 565px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.fila {
+  display: grid;
+  gap: 22px;
+}
+
+.fila-superior {
+  grid-template-columns: 1fr 1.25fr 1.65fr;
+}
+
+.fila-inferior {
+  grid-template-columns: 1fr 1fr 1fr 1.1fr;
+}
+
+.tarjeta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  border: 1px solid #1d1d5c;
+  border-radius: 22px;
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tarjeta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.fila-superior .tarjeta {
+  height: 156px;
+}
+
+.fila-inferior .tarjeta {
+  height: 330px;
+}
+
+.tarjeta h3 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.tarjeta p {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+}
+
+.tarjeta-rosa {
+  background: #eda0c0;
+}
+
+.tarjeta-verde {
+  background: #bdf27a;
+}
+
+.tarjeta-verde h3,
+.tarjeta-verde p,
+.tarjeta-rosa h3,
+.tarjeta-rosa p {
+  color: #fff;
+}
+
+.tarjeta-verde h3 {
+  color: #fff;
+}
+
+.flecha {
+  position: absolute;
+  bottom: 14px;
+  right: 18px;
+  font-size: 18px;
+  color: #fff;
+}
+
+.nuevo {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #fff;
+  color: #1d1d5c;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  transform: rotate(-35deg);
+}
+
+/* Tarjeta del logo */
+.tarjeta-logo {
+  background: #d9d9d9;
+}
+
+.logo-titulo {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 3px;
+  color: #1a1a9c;
+  margin-bottom: 6px;
+}
+
+.logo-subtitulo {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 3px;
+  color: #1a1a9c;
+  line-height: 1.3;
+}
+
+.logo-lema {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #1a1a9c;
+  margin-top: 6px;
+}
+
+/* Saldo */
+.saldo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 330px;
+  padding: 20px;
+}
+
+.saldo-titulo {
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  line-height: 1.3;
+  color: #000;
+}
+
+.saldo-monto {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 34px;
+  color: #000;
+  margin: 14px 0;
+}
+
+.saldo-nota {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  color: #111;
+  line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 760px) {
+  .fila-superior,
+  .fila-inferior {
+    grid-template-columns: 1fr;
+  }
+
+  .fila-superior .tarjeta,
+  .fila-inferior .tarjeta,
+  .saldo {
+    height: 180px;
+  }
+}
+/* ===== Página de movimientos ===== */
+.pagina {
+  padding: 30px 40px;
+  min-height: 565px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.pagina-top {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.tarjeta-volver {
+  width: 230px;
+  height: 130px;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 16px;
+  background: #eda0c0;
+  border: 1px solid #1d1d5c;
+  border-radius: 22px;
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tarjeta-volver:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.tarjeta-volver h3 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin-bottom: 6px;
+}
+
+.tarjeta-volver p {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+}
+
+.flecha-doble {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -3px;
+  color: #fff;
+}
+
+.buscador {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.buscador input {
+  flex: 1;
+  height: 48px;
+  border: 1px solid #1d1d5c;
+  border-radius: 24px;
+  background: #d9d9d9;
+  padding: 0 22px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  color: #111;
+  outline: none;
+}
+
+.buscador input:focus {
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(29, 29, 92, 0.25);
+}
+
+.tabla-wrap {
+  background: #fff;
+  padding: 10px 24px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: #111;
+}
+
+.tabla th,
+.tabla td {
+  text-align: left;
+  padding: 14px 8px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.tabla th {
+  font-weight: 600;
+  border-bottom: 1px solid #ccc;
+}
+
+.tabla .importe {
+  text-align: right;
+}
+
+.tipo-ingreso {
+  color: #1e7b34;
+  font-weight: 600;
+}
+
+.tipo-gasto {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.vacio {
+  text-align: center;
+  padding: 30px 0 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: #555;
+}
+
+/* Responsive */
+@media (max-width: 760px) {
+  .pagina-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tarjeta-volver {
+    width: 100%;
+    height: 110px;
+  }
+} 
+/* ===== Página de ingresar dinero ===== */
+.form-ingreso {
+  width: 100%;
+  max-width: 400px;
+  margin: 20px auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.campo label {
+  display: block;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #111;
+  margin-bottom: 6px;
+}
+
+.campo input,
+.campo select {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #1d1d5c;
+  border-radius: 22px;
+  background: #fff;
+  padding: 0 18px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  color: #111;
+  outline: none;
+}
+
+.campo input:focus,
+.campo select:focus {
+  box-shadow: 0 0 0 2px rgba(29, 29, 92, 0.25);
+}
+
+.campo-importe {
+  position: relative;
+}
+
+.campo-importe .signo {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  color: #111;
+}
+
+.campo-importe input {
+  padding-left: 36px;
+}
+
+.campo.invalido input,
+.campo.invalido select {
+  border-color: #c0392b;
+  background: #fff5f5;
+}
+
+.error-campo {
+  display: block;
+  min-height: 14px;
+  margin-top: 4px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  color: #c0392b;
+}
+
+.btn-guardar {
+  align-self: center;
+  margin-top: 8px;
+  height: 48px;
+  padding: 0 40px;
+  border: 1px solid #1d1d5c;
+  border-radius: 24px;
+  background: #bdf27a;
+  color: #000;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-guardar:hover {
+  background: #a8e05e;
+}
+
+.mensaje {
+  min-height: 18px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+}
+
+.mensaje.ok {
+  color: #1e7b34;
+}
+
+.mensaje.error {
+  color: #c0392b;
+} 
+/* ===== Botón de gastos (rosa) ===== */
+.btn-guardar.gasto {
+  background: #eda0c0;
+}
+
+.btn-guardar.gasto:hover {
+  background: #e28bb0;
+} 
+/* ===== Página de categorías ===== */
+.tarjeta-volver .nuevo {
+  top: 10px;
+  left: auto;
+  right: 12px;
+  transform: rotate(12deg);
+}
+
+.tabla-wrap + .tabla-wrap {
+  margin-top: 0;
+}
+
+.tabla .accion {
+  text-align: right;
+  width: 100px;
+}
+
+.btn-eliminar {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid #c0392b;
+  border-radius: 14px;
+  background: #fff;
+  color: #c0392b;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.btn-eliminar:hover {
+  background: #fff5f5;
+}  
+/* ===== Página de estadística ===== */
+.filtro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.filtro label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #111;
+  margin-bottom: 6px;
+}
+
+.filtro select {
+  width: 220px;
+  height: 44px;
+  border: 1px solid #1d1d5c;
+  border-radius: 22px;
+  background: #fff;
+  padding: 0 18px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  color: #111;
+  outline: none;
+}
+
+.resumen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.stat-card {
+  background: #fff;
+  border: 1px solid #1d1d5c;
+  border-radius: 22px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.stat-titulo {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #111;
+  margin-bottom: 8px;
+}
+
+.stat-valor {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  color: #000;
+}
+
+.stat-valor.ingreso {
+  color: #1e7b34;
+}
+
+.stat-valor.gasto {
+  color: #c0392b;
+}
+
+.bloque-titulo {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 18px;
+}
+
+.barra-fila {
+  margin-bottom: 16px;
+}
+
+.barra-info {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.barra-fondo {
+  width: 100%;
+  height: 14px;
+  background: #e5e5e5;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.barra-relleno {
+  height: 100%;
+  background: #eda0c0;
+  border-radius: 7px;
+  transition: width 0.3s ease;
+}
+
+@media (max-width: 760px) {
+  .resumen {
+    grid-template-columns: 1fr;
+  }
+
+  .filtro {
+    align-items: stretch;
+  }
+
+  .filtro select {
+    width: 100%;
+  }
+}

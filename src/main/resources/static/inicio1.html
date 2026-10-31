@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrate - Mi Plata</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Poppins:wght@400;500&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="logo">Mi Plata</div>
+      <div class="slogan">App financiera</div>
+    </header>
+
+    <main class="form-container">
+      <h1>Registrate</h1>
+
+      <form id="registro" novalidate>
+        <div class="form-group">
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" placeholder="Ingresá tu nombre">
+          <span class="error" id="error-nombre"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="dni">D. N. I.</label>
+          <input type="text" id="dni" inputmode="numeric" placeholder="Ingresá tu DNI">
+          <span class="error" id="error-dni"></span>
+        </div>
+
+        <div class="form-group spaced">
+          <label for="correo">Correo electrónico</label>
+          <input type="email" id="correo" placeholder="tucorreo@ejemplo.com">
+          <span class="error" id="error-correo"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="clave">Clave</label>
+          <input type="password" id="clave" placeholder="Mínimo 6 caracteres">
+          <span class="error" id="error-clave"></span>
+        </div>
+
+        <button type="submit" class="btn">Ingresar</button>
+        <p class="success" id="mensaje"></p>
+      </form>
+    </main>
+  </div>
+<script src="js/api.js"></script>
+ <script>
+    const form = document.getElementById('registro');
+    const mensaje = document.getElementById('mensaje');
+    const boton = form.querySelector('button');
+
+    const campos = {
+      nombre: {
+        input: document.getElementById('nombre'),
+        error: document.getElementById('error-nombre'),
+        validar: v => {
+          if (v.trim() === '') return 'El nombre es obligatorio.';
+          if (v.trim().length < 2) return 'Ingresá al menos 2 letras.';
+          if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s'.-]+$/.test(v.trim())) return 'Solo se permiten letras y espacios.';
+          return '';
+        }
+      },
+      dni: {
+        input: document.getElementById('dni'),
+        error: document.getElementById('error-dni'),
+        validar: v => {
+          if (v.trim() === '') return 'El DNI es obligatorio.';
+          if (!/^\d+$/.test(v)) return 'El DNI solo puede contener números.';
+          if (v.length < 7 || v.length > 8) return 'El DNI debe tener entre 7 y 8 dígitos.';
+          return '';
+        }
+      },
+      correo: {
+        input: document.getElementById('correo'),
+        error: document.getElementById('error-correo'),
+        validar: v => {
+          if (v.trim() === '') return 'El correo es obligatorio.';
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return 'Ingresá un correo electrónico válido.';
+          return '';
+        }
+      },
+      clave: {
+        input: document.getElementById('clave'),
+        error: document.getElementById('error-clave'),
+        validar: v => {
+          if (v === '') return 'La clave es obligatoria.';
+          if (v.length < 6) return 'La clave debe tener al menos 6 caracteres.';
+          return '';
+        }
+      }
+    };
+
+    function validarCampo(campo) {
+      const msg = campo.validar(campo.input.value);
+      campo.error.textContent = msg;
+      campo.input.classList.toggle('invalid', msg !== '');
+      return msg === '';
+    }
+
+    Object.values(campos).forEach(campo => {
+      campo.input.addEventListener('blur', () => validarCampo(campo));
+      campo.input.addEventListener('input', () => {
+        if (campo.input.classList.contains('invalid')) validarCampo(campo);
+      });
+    });
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      mensaje.textContent = '';
+      mensaje.style.color = '#c0392b';
+
+      let valido = true;
+      Object.values(campos).forEach(campo => {
+        if (!validarCampo(campo)) valido = false;
+      });
+
+      if (!valido) {
+        mensaje.textContent = 'Revisá los campos marcados.';
+        return;
+      }
+
+      boton.disabled = true;
+      try {
+        const respuesta = await api('/auth/registro', {
+          metodo: 'POST',
+          datos: {
+            nombre: campos.nombre.input.value.trim(),
+            dni: campos.dni.input.value.trim(),
+            correo: campos.correo.input.value.trim(),
+            clave: campos.clave.input.value
+          }
+        });
+
+        localStorage.setItem(CLAVE_TOKEN, respuesta.token);
+        window.location.href = 'inicio2.html';
+      } catch (error) {
+        mensaje.textContent = error.message;
+        boton.disabled = false;
+      }
+    });
+</script>

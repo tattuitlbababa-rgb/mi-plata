@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categorías - Mi Plata</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Poppins:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app pagina">
+
+    <div class="pagina-top">
+      <a href="index.html" class="tarjeta-volver">
+        <span class="flecha-doble">&gt;&gt;&gt;</span>
+        <span class="nuevo">NEW</span>
+        <h3>CATEGORÍAS</h3>
+        <p>Organizar movimientos</p>
+      </a>
+    </div>
+
+    <form id="form-categoria" class="form-ingreso" novalidate>
+      <div class="campo" id="campo-nombre">
+        <label for="nombre">Nueva categoría</label>
+        <input type="text" id="nombre" placeholder="Ej: Mascotas, Freelance">
+        <span class="error-campo" id="error-nombre"></span>
+      </div>
+
+      <div class="campo" id="campo-tipo">
+        <label for="tipo">Tipo</label>
+        <select id="tipo">
+          <option value="Ingreso">Ingreso</option>
+          <option value="Gasto">Gasto</option>
+        </select>
+        <span class="error-campo" id="error-tipo"></span>
+      </div>
+
+      <button type="submit" class="btn-guardar">Agregar categoría</button>
+      <p class="mensaje" id="mensaje"></p>
+    </form>
+
+    <div class="tabla-wrap">
+      <h3 class="bloque-titulo">Categorías de ingresos</h3>
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th>Movimientos</th>
+            <th class="importe">Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-ingresos"></tbody>
+      </table>
+    </div>
+
+    <div class="tabla-wrap">
+      <h3 class="bloque-titulo">Categorías de gastos</h3>
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th>Movimientos</th>
+            <th class="importe">Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-gastos"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script src="js/api.js"></script>
+<script>
+    // Si no hay sesión, vuelve al inicio de sesión
+    if (!localStorage.getItem(CLAVE_TOKEN)) {
+      window.location.href = 'inicio2.html';
+    }
+
+    const form = document.getElementById('form-categoria');
+    const mensaje = document.getElementById('mensaje');
+    const nombre = document.getElementById('nombre');
+    const tipo = document.getElementById('tipo');
+
+    let predefinidas = {};
+    let propias = [];
+    let movimientos = [];
+
+    function formatearMonto(numero) {
+      return '$ ' + Number(numero).toLocaleString('es-AR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+    }
+
+    // Quita mayúsculas y acentos para comparar nombres
+    function normalizar(texto) {
+      return String(texto).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    }
+
+    function escapar(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto;
+      return div.innerHTML;
+    }
+
+    // Trae categorías y movimientos desde el backend y redibuja las tablas
+    async function cargarTodo() {
+      try {
+        const [cats, movs] = await Promise.all([api('/categorias'), api('/movimientos')]);
+        predefinidas = cats.predefinidas;
+        propias = cats.propias;
+        movimientos = movs;
+        dibujarTodo();
+      } catch (error) {
+        mensaje.classList.add('error');
+        mensaje.textContent = error.message;
+      }
+    }
+
+    // Arma la tabla de un tipo (Ingreso o Gasto)
+    function dibujarTipo(tipoElegido, cuerpoId) {
+      const nombres = new Set(predefinidas[tipoElegido] || []);
+      propias.filter(c => c.tipo === tipoElegido).forEach(c => nombres.add(c.nombre));
+      movimientos.filter(m => m.tipo === tipoElegido).forEach(m => nombres.add(m.categoria));
+
+      const filas = [...nombres].map(nombreCat => {
+        const delTipo = movimientos.filter(m => m.tipo === tipoElegido && m.categoria === nombreCat);
+        const total = delTipo.reduce((suma, m) => suma + Number(m.importe), 0);
+        const propia = propias.find(c => c.tipo === tipoElegido && c.nombre === nombreCat);
+        return { nombre: nombreCat, cantidad: delTipo.length, total, propia };
+      }).sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
+
+      document.getElementById(cuerpoId).innerHTML = filas.map(f => `
+        <tr>
+          <td>${escapar(f.nombre)}</td>
+          <td>${f.cantidad}</td>
+          <td class="importe">${formatearMonto(f.total)}</td>
+          <td class="accion">
+            ${f.propia && f.cantidad === 0
+              ? `<button class="btn-eliminar" data-id="${f.propia.id}">Eliminar</button>`
+              : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function dibujarTodo() {
+      dibujarTipo('Ingreso', 'cuerpo-ingresos');
+      dibujarTipo('Gasto', 'cuerpo-gastos');
+    }
+
+    // Validación del nombre (el backend también valida los duplicados)
+    function validarNombre() {
+      const valor = nombre.value.trim();
+      if (valor === '') return 'Escribí un nombre para la categoría.';
+      if (valor.length < 2) return 'El nombre tiene que tener al menos 2 letras.';
+
+      const existe = [
+        ...(predefinidas[tipo.value] || []),
+        ...propias.filter(c => c.tipo === tipo.value).map(c => c.nombre)
+      ].some(n => normalizar(n) === normalizar(valor));
+
+      if (existe) return 'Esa categoría ya existe para este tipo.';
+      return '';
+    }
+
+    function mostrarError(idCampo, idError, msg) {
+      document.getElementById(idError).textContent = msg;
+      document.getElementById(idCampo).classList.toggle('invalido', msg !== '');
+    }
+
+    nombre.addEventListener('blur', () => mostrarError('campo-nombre', 'error-nombre', validarNombre()));
+    tipo.addEventListener('change', () => {
+      if (document.getElementById('campo-nombre').classList.contains('invalido')) {
+        mostrarError('campo-nombre', 'error-nombre', validarNombre());
+      }
+    });
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      mensaje.textContent = '';
+      mensaje.className = 'mensaje';
+
+      const errorNombre = validarNombre();
+      mostrarError('campo-nombre', 'error-nombre', errorNombre);
+
+      if (errorNombre) {
+        mensaje.classList.add('error');
+        mensaje.textContent = 'Revisá los campos marcados.';
+        return;
+      }
+
+      try {
+        await api('/categorias', {
+          metodo: 'POST',
+          datos: { nombre: nombre.value.trim(), tipo: tipo.value }
+        });
+        form.reset();
+        mensaje.classList.add('ok');
+        mensaje.textContent = 'Categoría agregada';
+        await cargarTodo();
+      } catch (error) {
+        mensaje.classList.add('error');
+        mensaje.textContent = error.message;
+      }
+    });
+
+    // Eliminar categorías propias sin movimientos
+    document.addEventListener('click', async e => {
+      const boton = e.target.closest('.btn-eliminar');
+      if (!boton) return;
+
+      try {
+        await api('/categorias/' + boton.dataset.id, { metodo: 'DELETE' });
+        await cargarTodo();
+      } catch (error) {
+        mensaje.classList.add('error');
+        mensaje.textContent = error.message;
+      }
+    });
+
+    window.addEventListener('pageshow', cargarTodo);
+
+    cargarTodo();
+</script>
+</body>
+</html>

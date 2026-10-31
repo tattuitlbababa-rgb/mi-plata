@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estadística - Mi Plata</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Poppins:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app pagina">
+
+    <div class="pagina-top">
+      <a href="index.html" class="tarjeta-volver">
+        <span class="flecha-doble">&gt;&gt;&gt;</span>
+        <h3>ESTADISTICA</h3>
+        <p>Ver en qué gastas</p>
+      </a>
+
+      <div class="filtro">
+        <label for="mes">Período</label>
+        <select id="mes"></select>
+      </div>
+    </div>
+
+    <div class="resumen">
+      <div class="stat-card">
+        <p class="stat-titulo">Ingresos</p>
+        <p class="stat-valor ingreso" id="total-ingresos">$ 0</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-titulo">Gastos</p>
+        <p class="stat-valor gasto" id="total-gastos">$ 0</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-titulo">Saldo disponible</p>
+        <p class="stat-valor" id="saldo-actual">$ 0</p>
+      </div>
+    </div>
+
+    <div class="tabla-wrap">
+      <h3 class="bloque-titulo">Gastos por categoría</h3>
+      <div id="barras"></div>
+      <p class="vacio" id="vacio">Todavía no hay gastos para mostrar.</p>
+    </div>
+
+  </div>
+
+  <script src="js/api.js"></script>
+<script>
+    // Si no hay sesión, vuelve al inicio de sesión
+    if (!localStorage.getItem(CLAVE_TOKEN)) {
+      window.location.href = 'inicio2.html';
+    }
+
+    const selectMes = document.getElementById('mes');
+    const barras = document.getElementById('barras');
+    const vacio = document.getElementById('vacio');
+
+    function formatearMonto(numero) {
+      return '$ ' + Number(numero).toLocaleString('es-AR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+    }
+
+    // "2026-10" -> "10/2026"
+    function nombreMes(aaaamm) {
+      const [anio, mes] = aaaamm.split('-');
+      return `${mes}/${anio}`;
+    }
+
+    // Arma el desplegable con los meses que devuelve el backend
+    function cargarMeses(meses) {
+      const valorActual = selectMes.value;
+
+      selectMes.innerHTML = '<option value="todos">Todos los meses</option>' +
+        meses.map(m => `<option value="${m}">${nombreMes(m)}</option>`).join('');
+
+      if ([...selectMes.options].some(o => o.value === valorActual)) {
+        selectMes.value = valorActual;
+      }
+    }
+
+    async function dibujar() {
+      try {
+        const mesElegido = selectMes.value;
+        const ruta = mesElegido && mesElegido !== 'todos'
+          ? '/resumen?mes=' + mesElegido
+          : '/resumen';
+
+        const resumen = await api(ruta);
+
+        // Los meses siempre vienen del historial completo
+        cargarMeses(resumen.meses);
+        // Si el mes elegido ya no existe, vuelve a "Todos"
+        if (selectMes.value === '' ) selectMes.value = 'todos';
+
+        document.getElementById('total-ingresos').textContent = formatearMonto(resumen.ingresos);
+        document.getElementById('total-gastos').textContent = formatearMonto(resumen.gastos);
+
+        // El saldo es el total real, no depende del filtro
+        document.getElementById('saldo-actual').textContent = formatearMonto(resumen.saldo);
+
+        const categorias = resumen.gastosPorCategoria;
+
+        if (categorias.length === 0) {
+          barras.innerHTML = '';
+          vacio.style.display = 'block';
+          return;
+        }
+
+        vacio.style.display = 'none';
+        barras.innerHTML = categorias.map(c => {
+          const porcentaje = resumen.gastos > 0 ? (c.total / resumen.gastos) * 100 : 0;
+          return `
+            <div class="barra-fila">
+              <div class="barra-info">
+                <span>${c.categoria}</span>
+                <span>${formatearMonto(c.total)} (${porcentaje.toFixed(0)}%)</span>
+              </div>
+              <div class="barra-fondo">
+                <div class="barra-relleno" style="width: ${porcentaje}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        vacio.textContent = error.message;
+        vacio.style.display = 'block';
+      }
+    }
+
+    selectMes.addEventListener('change', dibujar);
+    window.addEventListener('pageshow', dibujar);
+
+    dibujar();
+</script>
+</body>
+</html>
