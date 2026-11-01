@@ -1,12 +1,33 @@
 package com.miplata.miplata.dominio;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "usuarios")
 public class Usuario {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_usuario")
     private int idUsuario;
+
+    @Column(name = "nombre", length = 100, nullable = false)
     private String nombre;
+
+    // En la base la columna se llama "correo"; en el documento aparece como "email"
+    @Column(name = "correo", length = 100, nullable = false, unique = true)
     private String email;
+
+    @Column(name = "dni", length = 8, nullable = false)
     private String dni;
+
+    // En la base se guarda como clave_hash, cifrada. Nunca se guarda en texto plano
+    @Column(name = "clave_hash", length = 255, nullable = false)
     private String contraseña;
+
+    // JPA necesita un constructor sin parámetros para crear el objeto al leer de la base
+    protected Usuario() {
+    }
 
     public Usuario(String nombre, String email, String dni, String contraseña) {
         this.nombre = nombre;
@@ -55,23 +76,19 @@ public class Usuario {
         this.contraseña = contraseña;
     }
 
-    // Valida que el nombre tenga al menos 2 letras y solo letras y espacios
     public boolean nombreValido() {
         return nombre != null && nombre.trim().length() >= 2
                 && nombre.matches("[A-Za-zÁÉÍÓÚáéíóúÑñÜü\\s'.-]+");
     }
 
-    // Valida que el email tenga un formato correcto
     public boolean emailValido() {
         return email != null && email.matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}");
     }
 
-    // Valida que el DNI tenga 7 u 8 dígitos
     public boolean dniValido() {
         return dni != null && dni.matches("\\d{7,8}");
     }
 
-    // Valida que la contraseña tenga al menos 6 caracteres
     public boolean contraseñaValida() {
         return contraseña != null && contraseña.length() >= 6;
     }
