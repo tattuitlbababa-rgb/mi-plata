@@ -1,16 +1,34 @@
 package com.miplata.miplata.dominio;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "categorias")
 public class Categoria {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_categoria")
     private int idCategoria;
+
+    @Column(name = "nombre", length = 60, nullable = false)
     private String nombre;
-    private int idUsuario;
+
+    @Column(name = "tipo", length = 10, nullable = false)
     private String tipo;
+
+    // Muchas categorías pueden pertenecer a un mismo usuario
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
+    protected Categoria() {
+    }
 
     public Categoria(String nombre, String tipo, Usuario usuario) {
         this.nombre = nombre;
         this.tipo = tipo;
-        this.idUsuario = usuario.getIdUsuario();
+        this.usuario = usuario;
     }
 
     public int getIdCategoria() {
@@ -29,20 +47,22 @@ public class Categoria {
         this.nombre = nombre;
     }
 
-    public int getIdUsuario() {
-        return idUsuario;
-    }
-
     public String getTipo() {
         return tipo;
     }
 
-    // Valida que el nombre tenga entre 2 y 60 caracteres
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public int getIdUsuario() {
+        return usuario.getIdUsuario();
+    }
+
     public boolean nombreValido() {
         return nombre != null && nombre.trim().length() >= 2 && nombre.trim().length() <= 60;
     }
 
-    // Valida que el tipo sea Ingreso o Gasto
     public boolean tipoValido() {
         return "Ingreso".equals(tipo) || "Gasto".equals(tipo);
     }
@@ -56,15 +76,5 @@ public class Categoria {
     public void modificarCategoria(String nuevoNombre) {
         this.nombre = nuevoNombre;
         crearCategoria();
-    }
-
-    // Una categoría solo se puede eliminar si no tiene movimientos asociados
-    public boolean eliminarCategoria(java.util.List<Movimiento> movimientos) {
-        boolean tieneMovimientos = movimientos.stream()
-                .anyMatch(m -> m.getIdCategoria() == this.idCategoria);
-        if (tieneMovimientos) {
-            throw new IllegalStateException("La categoría tiene movimientos y no se puede eliminar");
-        }
-        return true;
     }
 }
