@@ -1,16 +1,16 @@
 package com.miplata.miplata.controller;
 
+import com.miplata.miplata.dominio.Categoria;
+import com.miplata.miplata.dominio.Usuario;
+import com.miplata.miplata.repositorio.CategoriaRepository;
+import com.miplata.miplata.repositorio.MovimientoRepository;
+import com.miplata.miplata.repositorio.UsuarioRepository;
 import com.miplata.miplata.util.Constantes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,10 +19,16 @@ import java.util.Map;
 @RequestMapping("/api/categorias")
 public class CategoriasController {
 
-    private final JdbcTemplate db;
+    private final CategoriaRepository categorias;
+    private final MovimientoRepository movimientos;
+    private final UsuarioRepository usuarios;
 
-    public CategoriasController(JdbcTemplate db) {
-        this.db = db;
+    public CategoriasController(CategoriaRepository categorias,
+                                MovimientoRepository movimientos,
+                                UsuarioRepository usuarios) {
+        this.categorias = categorias;
+        this.movimientos = movimientos;
+        this.usuarios = usuarios;
     }
 
     public record CategoriaRequest(String nombre, String tipo) {}
@@ -30,8 +36,13 @@ public class CategoriasController {
     // GET /api/categorias → predefinidas y propias del usuario
     @GetMapping
     public Map<String, Object> listar(@RequestAttribute("usuarioId") int usuarioId) {
-        List<Map<String, Object>> propias = db.queryForList(
-                "SELECT id, nombre, tipo FROM categorias WHERE usuario_id = ? ORDER BY nombre", usuarioId);
+        List<Map<String, Object>> propias = categorias.findByUsuarioIdUsuario(usuarioId).stream()
+                .map(c -> Map.<String, Object>of(
+                        "id", c.getIdCategoria(),
+                        "nombre", c.getNombre(),
+                        "tipo", c.getTipo()))
+                .toList();
+
         return Map.of("predefinidas", Constantes.PREDEFINIDAS, "propias", propias);
     }
 
@@ -42,58 +53,45 @@ public class CategoriasController {
         String nombre = req.nombre() == null ? "" : req.nombre().trim();
         String tipo = req.tipo();
 
-        if (nombre.length() < 2 || nombre.length() > 60) {
-            throw error(HttpStatus.BAD_REQUEST, "El nombre tiene que tener entre 2 y 60 caracteres");
-        }
-        if (tipo == null || !Constantes.TIPOS.contains(tipo)) {
-            throw error(HttpStatus.BAD_REQUEST, "Tipo inválido");
+        Usuario usuario = usuarios.findById(usuarioId)
+                .orElseThrow(() -> error(HttpStatus.UNAUTHORIZED, "Sesión inválida"));
+
+        // Creo el objeto y dejo que la entidad valide sus datos
+        Categoria nueva = new Categoria(nombre, tipo, usuario);
+        try {
+            nueva.crearCategoria();
+        } catch (IllegalArgumentException e) {
+            throw error(HttpStatus.BAD_REQUEST, e.getMessage());
         }
 
-        List<String> propias = db.queryForList(
-                "SELECT nombre FROM categorias WHERE usuario_id = ? AND tipo = ?", String.class, usuarioId, tipo);
-
+        // Verifico duplicados contra las predefinidas y las propias del usuario
         List<String> existentes = new ArrayList<>(Constantes.PREDEFINIDAS.get(tipo));
-        existentes.addAll(propias);
+        categorias.findByUsuarioIdUsuarioAndTipo(usuarioId, tipo)
+                .forEach(c -> existentes.add(c.getNombre()));
 
         String buscada = normalizar(nombre);
         if (existentes.stream().anyMatch(n -> normalizar(n).equals(buscada))) {
             throw error(HttpStatus.CONFLICT, "Esa categoría ya existe para este tipo");
         }
 
-        KeyHolder kh = new GeneratedKeyHolder();
-        db.update(con -> {
-            PreparedStatement ps = con.prepareStatement(
-                    "INSERT INTO categorias (usuario_id, nombre, tipo) VALUES (?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
-            ps.setInt(1, usuarioId);
-            ps.setString(2, nombre);
-            ps.setString(3, tipo);
-            return ps;
-        }, kh);
-
-        int id = kh.getKey().intValue();
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id", id, "nombre", nombre, "tipo", tipo));
+        Categoria guardada = categorias.save(nueva);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("id", guardada.getIdCategoria(), "nombre", nombre, "tipo", tipo));
     }
 
     // DELETE /api/categorias/{id}  (solo si no tiene movimientos)
     @DeleteMapping("/{id}")
     public Map<String, Object> eliminar(@RequestAttribute("usuarioId") int usuarioId,
                                         @PathVariable int id) {
-        List<Map<String, Object>> filas = db.queryForList(
-                "SELECT nombre, tipo FROM categorias WHERE id = ? AND usuario_id = ?", id, usuarioId);
-        if (filas.isEmpty()) throw error(HttpStatus.NOT_FOUND, "Categoría no encontrada");
+        Categoria categoria = categorias.findById(id)
+                .filter(c -> c.getIdUsuario() == usuarioId)
+                .orElseThrow(() -> error(HttpStatus.NOT_FOUND, "Categoría no encontrada"));
 
-        String nombre = (String) filas.get(0).get("nombre");
-        String tipo = (String) filas.get(0).get("tipo");
-
-        Integer uso = db.queryForObject(
-                "SELECT COUNT(*) FROM movimientos WHERE usuario_id = ? AND tipo = ? AND categoria = ?",
-                Integer.class, usuarioId, tipo, nombre);
-        if (uso != null && uso > 0) {
+        if (movimientos.existsByCategoriaIdCategoria(id)) {
             throw error(HttpStatus.CONFLICT, "La categoría tiene movimientos y no se puede eliminar");
         }
 
-        db.update("DELETE FROM categorias WHERE id = ? AND usuario_id = ?", id, usuarioId);
+        categorias.delete(categoria);
         return Map.of("ok", true);
     }
 
