@@ -79,7 +79,7 @@ public class CategoriasController {
                 .body(Map.of("id", guardada.getIdCategoria(), "nombre", nombre, "tipo", tipo));
     }
 
-    // DELETE /api/categorias/{id}  (solo si no tiene movimientos)
+        // DELETE /api/categorias/{id}  (solo si no tiene movimientos)
     @DeleteMapping("/{id}")
     public Map<String, Object> eliminar(@RequestAttribute("usuarioId") int usuarioId,
                                         @PathVariable int id) {
@@ -87,14 +87,15 @@ public class CategoriasController {
                 .filter(c -> c.getIdUsuario() == usuarioId)
                 .orElseThrow(() -> error(HttpStatus.NOT_FOUND, "Categoría no encontrada"));
 
-        if (movimientos.existsByCategoriaIdCategoria(id)) {
+        // Los movimientos guardan el nombre de la categoría, no su id
+        if (movimientos.existsByUsuarioIdUsuarioAndTipoAndCategoriaNombre(
+                usuarioId, categoria.getTipo(), categoria.getNombre())) {
             throw error(HttpStatus.CONFLICT, "La categoría tiene movimientos y no se puede eliminar");
         }
 
         categorias.delete(categoria);
         return Map.of("ok", true);
     }
-
     private static String normalizar(String texto) {
         return texto.toLowerCase().replaceAll("\\p{M}", "").trim();
     }

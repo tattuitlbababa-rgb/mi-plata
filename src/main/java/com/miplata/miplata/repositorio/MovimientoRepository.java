@@ -10,6 +10,7 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Integer>
     // Historial del usuario, del más reciente al más antiguo
     List<Movimiento> findByUsuarioIdUsuarioOrderByFechaDescIdMovimientoDesc(int idUsuario);
 
-    // Movimientos que pertenecen a una categoría (sirve para no borrar categorías en uso)
-    boolean existsByCategoriaIdCategoria(int idCategoria);
+    // Indica si hay movimientos de ese usuario, con ese tipo y ese nombre de categoría
+    // (así se verifica si una categoría está en uso antes de borrarla)
+    boolean existsByUsuarioIdUsuarioAndTipoAndCategoriaNombre(int idUsuario, String tipo, String categoriaNombre);
 }

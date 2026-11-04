@@ -10,7 +10,7 @@ public class Movimiento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_movimiento")
+    @Column(name = "id")
     private int idMovimiento;
 
     @Column(name = "descripcion", length = 150, nullable = false)
@@ -32,11 +32,9 @@ public class Movimiento {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    // Muchos movimientos pueden tener la misma categoría.
-    // Es opcional en el modelo: los ingresos guardados desde la app también usan categoría
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "categoria_id", nullable = false)
-    private Categoria categoria;
+    // En la base la categoría se guarda como texto (nombre de la categoría)
+    @Column(name = "categoria", length = 60, nullable = false)
+    private String categoriaNombre;
 
     // Campo calculado: no se guarda en la base
     @Transient
@@ -50,7 +48,7 @@ public class Movimiento {
         this.monto = monto;
         this.fecha = fecha;
         this.tipo = tipo;
-        this.categoria = categoria;
+        this.categoriaNombre = categoria.getNombre();
         this.usuario = categoria.getUsuario();
     }
 
@@ -98,16 +96,12 @@ public class Movimiento {
         return usuario;
     }
 
-    public Categoria getCategoria() {
-        return categoria;
-    }
-
     public int getIdUsuario() {
         return usuario.getIdUsuario();
     }
 
-    public int getIdCategoria() {
-        return categoria.getIdCategoria();
+    public String getCategoriaNombre() {
+        return categoriaNombre;
     }
 
     public boolean esValido() {
