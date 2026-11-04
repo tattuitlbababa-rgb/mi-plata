@@ -1,0 +1,14 @@
+package com.miplata.miplata.repositorio;
+
+import com.miplata.miplata.dominio.Usuario;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
+
+    // Spring genera la consulta SELECT ... WHERE correo = ? a partir del nombre del método
+    Optional<Usuario> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+}
