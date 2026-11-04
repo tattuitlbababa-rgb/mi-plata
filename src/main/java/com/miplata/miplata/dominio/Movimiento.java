@@ -1,24 +1,57 @@
 package com.miplata.miplata.dominio;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
+@Entity
+@Table(name = "movimientos")
 public class Movimiento {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_movimiento")
     private int idMovimiento;
+
+    @Column(name = "descripcion", length = 150, nullable = false)
     private String descripcion;
+
+    @Column(name = "importe", nullable = false)
     private double monto;
+
+    // Solo fecha, sin hora: DATE en MySQL
+    @Temporal(TemporalType.DATE)
+    @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
+
+    @Column(name = "tipo", length = 10, nullable = false)
     private String tipo;
-    private int idUsuario;
-    private int idCategoria;
+
+    // Muchos movimientos pertenecen a un usuario
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
+    // Muchos movimientos pueden tener la misma categoría.
+    // Es opcional en el modelo: los ingresos guardados desde la app también usan categoría
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private Categoria categoria;
+
+    // Campo calculado: no se guarda en la base
+    @Transient
+    private double saldoTemporal;
+
+    protected Movimiento() {
+    }
 
     public Movimiento(String descripcion, double monto, LocalDate fecha, String tipo, Categoria categoria) {
         this.descripcion = descripcion;
         this.monto = monto;
         this.fecha = fecha;
         this.tipo = tipo;
-        this.idCategoria = categoria.getIdCategoria();
-        this.idUsuario = categoria.getIdUsuario();
+        this.categoria = categoria;
+        this.usuario = categoria.getUsuario();
     }
 
     public int getIdMovimiento() {
@@ -61,15 +94,22 @@ public class Movimiento {
         this.tipo = tipo;
     }
 
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
     public int getIdUsuario() {
-        return idUsuario;
+        return usuario.getIdUsuario();
     }
 
     public int getIdCategoria() {
-        return idCategoria;
+        return categoria.getIdCategoria();
     }
 
-    // Valida que el monto sea mayor a cero, la descripción no esté vacía y el tipo sea Ingreso o Gasto
     public boolean esValido() {
         return monto > 0
                 && descripcion != null && !descripcion.trim().isEmpty() && descripcion.length() <= 150
@@ -90,12 +130,8 @@ public class Movimiento {
         registrarMovimiento();
     }
 
-    public void eliminarMovimiento() {
-        this.idMovimiento = 0;
-    }
-
     // Suma los ingresos y resta los gastos de una lista de movimientos
-    public static double calcularSaldo(java.util.List<Movimiento> movimientos) {
+    public static double calcularSaldo(List<Movimiento> movimientos) {
         double saldo = 0;
         for (Movimiento m : movimientos) {
             saldo += "Ingreso".equals(m.getTipo()) ? m.getMonto() : -m.getMonto();
