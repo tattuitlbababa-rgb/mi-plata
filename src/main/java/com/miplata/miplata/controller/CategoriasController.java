@@ -79,7 +79,7 @@ public class CategoriasController {
                 .body(Map.of("id", guardada.getIdCategoria(), "nombre", nombre, "tipo", tipo));
     }
 
-        // DELETE /api/categorias/{id}  (solo si no tiene movimientos)
+    // DELETE /api/categorias/{id}  (solo si no tiene movimientos)
     @DeleteMapping("/{id}")
     public Map<String, Object> eliminar(@RequestAttribute("usuarioId") int usuarioId,
                                         @PathVariable int id) {
@@ -96,6 +96,7 @@ public class CategoriasController {
         categorias.delete(categoria);
         return Map.of("ok", true);
     }
+
     private static String normalizar(String texto) {
         return texto.toLowerCase().replaceAll("\\p{M}", "").trim();
     }
