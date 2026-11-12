@@ -52,6 +52,16 @@ public class Movimiento {
         this.usuario = categoria.getUsuario();
     }
 
+    public Movimiento(String descripcion, double monto, LocalDate fecha, String tipo,
+                      String categoriaNombre, Usuario usuario) {
+        this.descripcion = descripcion;
+        this.monto = monto;
+        this.fecha = fecha;
+        this.tipo = tipo;
+        this.categoriaNombre = categoriaNombre;
+        this.usuario = usuario;
+    }
+
     public int getIdMovimiento() {
         return idMovimiento;
     }
