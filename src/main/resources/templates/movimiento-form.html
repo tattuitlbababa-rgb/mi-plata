@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabecera(${titulo})}"></head>
+<body>
+<div class="contenedor-app">
+  <nav th:replace="~{fragments/layout :: barra}"></nav>
+
+  <main class="p-4">
+    <h1 class="h3 fw-bold mb-0" th:text="${titulo}">INGRESAR DINERO</h1>
+    <p th:text="${subtitulo}">Registrar ingreso</p>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{${accion}}" th:object="${form}" method="post"
+          class="bg-white p-4 mx-auto" style="max-width: 480px;">
+
+      <div class="mb-3">
+        <label for="fecha" class="form-label">Fecha</label>
+        <input type="date" class="form-control" th:field="*{fecha}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="descripcion" class="form-label">Descripción</label>
+        <input type="text" class="form-control" th:field="*{descripcion}" maxlength="150"
+               th:placeholder="${tipo == 'Ingreso'} ? 'Ej: Sueldo, Venta de ropa' : 'Ej: Supermercado, Boleto'"
+               required>
+      </div>
+
+      <div class="mb-3">
+        <label for="categoria" class="form-label">Categoría</label>
+        <select class="form-select" th:field="*{categoria}" required>
+          <option value="">Elegí una categoría</option>
+          <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}">Otros</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="importe" class="form-label">Importe</label>
+        <div class="input-group">
+          <span class="input-group-text">$</span>
+          <input type="number" class="form-control" th:field="*{importe}"
+                 step="0.01" min="0.01" placeholder="0" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-dark w-100"
+              th:text="${'Guardar ' + #strings.toLowerCase(tipo)}">Guardar</button>
+    </form>
+  </main>
+</div>
+</body>
+</html>

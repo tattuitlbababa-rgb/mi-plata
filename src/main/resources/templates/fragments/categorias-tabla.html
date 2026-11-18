@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Tabla de categorías de un tipo. Parámetros: titulo y filas (lista de CategoriaResumen) -->
+<div th:fragment="tabla(titulo, filas)" class="mb-4">
+  <h2 class="h5 fw-bold" th:text="${titulo}">Categorías</h2>
+  <div class="table-responsive">
+    <table class="table table-striped align-middle bg-white mb-0">
+      <thead>
+        <tr>
+          <th>Categoría</th>
+          <th>Movimientos</th>
+          <th class="text-end">Total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="f : ${filas}">
+          <td>
+            <!-- Las predefinidas solo se muestran; las propias se pueden renombrar -->
+            <span th:unless="${f.propia}" th:text="${f.nombre}">Otros</span>
+            <form th:if="${f.propia}" th:action="@{/categorias/{id}/editar(id=${f.id})}"
+                  method="post" class="d-flex gap-2 m-0">
+              <input type="text" name="nombre" th:value="${f.nombre}" minlength="2" maxlength="60"
+                     class="form-control form-control-sm" required>
+              <button type="submit" class="btn btn-sm btn-outline-dark">Guardar</button>
+            </form>
+          </td>
+          <td th:text="${f.cantidad}">0</td>
+          <td class="text-end"
+              th:text="${'$ ' + #numbers.formatDecimal(f.total, 1, 'POINT', 0, 'COMMA')}">$ 0</td>
+          <td class="text-end">
+            <!-- Solo se puede eliminar una categoría propia sin movimientos -->
+            <form th:if="${f.propia and f.cantidad == 0}"
+                  th:action="@{/categorias/{id}/eliminar(id=${f.id})}" method="post" class="m-0"
+                  onsubmit="return confirm('¿Eliminar esta categoría?');">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

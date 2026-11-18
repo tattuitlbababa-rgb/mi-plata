@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabecera('Inicio')}"></head>
+<body>
+<div class="contenedor-app">
+  <nav th:replace="~{fragments/layout :: barra}"></nav>
+
+  <main class="p-4">
+    <div class="row g-3">
+
+      <div class="col-md-4">
+        <a th:href="@{/movimientos}" class="card tarjeta-menu tarjeta-rosa h-100 text-decoration-none">
+          <div class="card-body">
+            <h3>MOVIMIENTOS</h3>
+            <p>Consulta tu historial</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-4">
+        <a th:href="@{/ingresar}" class="card tarjeta-menu tarjeta-rosa h-100 text-decoration-none">
+          <div class="card-body"><h3>INGRESAR DINERO</h3><p>Registrar ingreso</p></div>
+        </a>
+      </div>
+
+      <div class="col-md-4">
+        <a th:href="@{/gastos}" class="card tarjeta-menu tarjeta-verde h-100 text-decoration-none">
+          <div class="card-body"><h3>REGISTRAR GASTOS</h3><p>Anotar tus compras</p></div>
+        </a>
+      </div>
+
+      <!-- Se activa cuando migremos la estadística -->
+      <div class="col-md-4">
+        <div class="card tarjeta-menu tarjeta-rosa pendiente h-100">
+          <div class="card-body"><h3>ESTADÍSTICA</h3><p>Próximamente</p></div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <a th:href="@{/categorias}" class="card tarjeta-menu tarjeta-verde h-100 text-decoration-none">
+          <div class="card-body"><h3>CATEGORÍAS</h3><p>Organizar movimientos</p></div>
+        </a>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card h-100 text-center">
+          <div class="card-body">
+            <p class="fw-bold mb-1">SALDO DISPONIBLE</p>
+            <p class="saldo-monto"
+               th:text="${'$ ' + #numbers.formatDecimal(saldo, 1, 'POINT', 2, 'COMMA')}">$ 0,00</p>
+            <small class="text-secondary">Se actualiza con tus movimientos guardados</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="h5 fw-bold mt-4">Últimos movimientos</h2>
+    <div class="table-responsive">
+      <table class="table table-sm bg-white align-middle">
+        <tbody>
+          <tr th:each="m : ${ultimos}">
+            <td th:text="${#temporals.format(m.fecha, 'dd/MM/yyyy')}">01/01/2026</td>
+            <td th:text="${m.descripcion}">Descripción</td>
+            <td th:text="${m.categoriaNombre}">Categoría</td>
+            <td class="text-end fw-medium"
+                th:classappend="${m.tipo == 'Ingreso'} ? 'tipo-ingreso' : 'tipo-gasto'"
+                th:text="${'$ ' + #numbers.formatDecimal(m.monto, 1, 'POINT', 0, 'COMMA')}">$ 0</td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(ultimos)}">
+            <td class="text-center text-secondary">Todavía no registraste movimientos.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body>
+</html>

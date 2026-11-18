@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabecera('Categorías')}"></head>
+<body>
+<div class="contenedor-app">
+  <nav th:replace="~{fragments/layout :: barra}"></nav>
+
+  <main class="p-4">
+    <h1 class="h3 fw-bold mb-0">CATEGORÍAS</h1>
+    <p>Organizar movimientos</p>
+
+    <div th:if="${ok}" class="alert alert-success" th:text="${ok}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{/categorias}" method="post" class="row g-2 align-items-end bg-white p-3 mb-4 mx-0">
+      <div class="col-md-6">
+        <label for="nombre" class="form-label">Nueva categoría</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" minlength="2" maxlength="60"
+               placeholder="Ej: Mascotas, Freelance" required>
+      </div>
+      <div class="col-md-3">
+        <label for="tipo" class="form-label">Tipo</label>
+        <select class="form-select" id="tipo" name="tipo">
+          <option value="Ingreso">Ingreso</option>
+          <option value="Gasto">Gasto</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-dark w-100">Agregar categoría</button>
+      </div>
+    </form>
+
+    <div th:replace="~{fragments/categorias-tabla :: tabla('Categorías de ingresos', ${ingresos})}"></div>
+    <div th:replace="~{fragments/categorias-tabla :: tabla('Categorías de gastos', ${gastos})}"></div>
+  </main>
+</div>
+</body>
+</html>

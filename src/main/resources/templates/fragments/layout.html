@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="cabecera(titulo)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${titulo} + ' - Mi Plata'">Mi Plata</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Poppins:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/miplata.css}">
+</head>
+<body>
+
+  <!-- Barra para las páginas con sesión iniciada -->
+  <nav th:fragment="barra" class="barra-miplata d-flex align-items-center flex-wrap gap-3 px-3 py-1">
+    <a class="logo" th:href="@{/inicio}">Mi Plata</a>
+    <a class="link-dark fw-medium text-decoration-none" th:href="@{/movimientos}">Movimientos</a>
+    <a class="link-dark fw-medium text-decoration-none" th:href="@{/ingresar}">Ingresar</a>
+    <a class="link-dark fw-medium text-decoration-none" th:href="@{/gastos}">Gastos</a>
+    <a class="link-dark fw-medium text-decoration-none" th:href="@{/categorias}">Categorías</a>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <span class="small fw-medium" th:text="${session.nombre}">Usuario</span>
+      <form th:action="@{/logout}" method="post" class="m-0">
+        <button type="submit" class="btn btn-sm btn-dark">Salir</button>
+      </form>
+    </div>
+  </nav>
+
+  <!-- Encabezado para login y registro (sin sesión) -->
+  <header th:fragment="encabezado" class="barra-miplata d-flex align-items-center gap-3 px-3">
+    <span class="logo">Mi Plata</span>
+    <span class="slogan">App financiera</span>
+  </header>
+
+</body>
+</html>

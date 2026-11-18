@@ -1,0 +1,56 @@
+/* Estilos propios de Mi Plata. Bootstrap hace el resto. */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f2f4f7;
+}
+
+.contenedor-app {
+  max-width: 1010px;
+  min-height: 565px;
+  margin: 20px auto;
+  background: #b5e1e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding-bottom: 40px;
+}
+
+.barra-miplata {
+  background: #bdf27a;
+  min-height: 46px;
+}
+
+.logo {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 30px;
+  color: #000;
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+
+.slogan {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: #111;
+}
+
+/* Tarjetas del menú principal */
+.tarjeta-menu {
+  border: 1px solid #1d1d5c;
+  border-radius: 0;
+  color: #fff;
+  transition: transform .15s;
+}
+.tarjeta-menu h3 { font-size: 1.25rem; font-weight: 700; }
+.tarjeta-menu p { margin: 0; }
+.tarjeta-rosa { background: #eda0c0; }
+.tarjeta-verde { background: #bdf27a; }
+a.tarjeta-menu:hover { transform: translateY(-3px); color: #fff; }
+.tarjeta-menu.pendiente { opacity: .55; cursor: not-allowed; }
+
+.saldo-monto { font-size: 2rem; font-weight: 700; margin: 0; }
+
+.tipo-ingreso { color: #1e7b34; }
+.tipo-gasto { color: #c0392b; }

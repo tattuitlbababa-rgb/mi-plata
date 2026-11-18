@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabecera('Registrate')}"></head>
+<body>
+<div class="contenedor-app">
+  <header th:replace="~{fragments/layout :: encabezado}"></header>
+
+  <main class="mx-auto p-4" style="max-width: 420px;">
+    <h1 class="h2 fw-bold mt-3">Registrate</h1>
+    <p class="text-secondary">Creá tu cuenta para empezar</p>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{/registro}" method="post">
+      <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre</label>
+        <input type="text" class="form-control" id="nombre" name="nombre"
+               th:value="${nombre}" minlength="2" required>
+      </div>
+      <div class="mb-3">
+        <label for="dni" class="form-label">DNI</label>
+        <input type="text" class="form-control" id="dni" name="dni"
+               th:value="${dni}" pattern="\d{7,8}" title="7 u 8 dígitos" inputmode="numeric" required>
+      </div>
+      <div class="mb-3">
+        <label for="correo" class="form-label">Correo electrónico</label>
+        <input type="email" class="form-control" id="correo" name="correo"
+               th:value="${correo}" placeholder="tucorreo@ejemplo.com" required>
+      </div>
+      <div class="mb-3">
+        <label for="clave" class="form-label">Clave</label>
+        <input type="password" class="form-control" id="clave" name="clave"
+               placeholder="Mínimo 6 caracteres" minlength="6" required>
+      </div>
+      <button type="submit" class="btn btn-dark w-100">Crear cuenta</button>
+      <p class="mt-3 text-center">¿Ya tenés cuenta? <a th:href="@{/login}">Ingresá</a></p>
+    </form>
+  </main>
+</div>
+</body>
+</html>
