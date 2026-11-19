@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabecera('Error')}"></head>
+<body>
+<div class="contenedor-app">
+  <header th:replace="~{fragments/layout :: encabezado}"></header>
+
+  <main class="mx-auto p-4 text-center" style="max-width: 520px;">
+    <h1 class="h3 fw-bold mt-4" th:text="${titulo} ?: 'Algo salió mal'">Algo salió mal</h1>
+    <p th:text="${mensaje} ?: 'No pudimos mostrar esta página.'">Mensaje del error</p>
+    <a th:href="@{/inicio}" class="btn btn-dark">Volver al inicio</a>
+  </main>
+</div>
+</body>
+</html>

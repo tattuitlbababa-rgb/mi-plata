@@ -6,20 +6,37 @@
   <nav th:replace="~{fragments/layout :: barra}"></nav>
 
   <main class="p-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
-      <div>
-        <h1 class="h3 fw-bold mb-0">MOVIMIENTOS</h1>
-        <p class="mb-0">Consulta tu historial</p>
-      </div>
+    <h1 class="h3 fw-bold mb-0">MOVIMIENTOS</h1>
+    <p>Consulta tu historial</p>
 
-      <form th:action="@{/movimientos}" method="get" class="d-flex gap-2">
-        <input type="search" name="q" th:value="${q}" class="form-control"
-               placeholder="Buscar movimientos">
-        <button type="submit" class="btn btn-dark">Buscar</button>
-        <a th:unless="${#strings.isEmpty(q)}" th:href="@{/movimientos}"
-           class="btn btn-outline-dark">Limpiar</a>
-      </form>
-    </div>
+    <!-- Filtros: se mandan por GET y el servidor arma la consulta con Criteria API -->
+    <form th:action="@{/movimientos}" method="get" class="row g-2 align-items-end bg-white p-3 mx-0 mb-3">
+      <div class="col-md-3">
+        <label for="q" class="form-label mb-1">Buscar</label>
+        <input type="search" id="q" name="q" th:value="${q}" class="form-control"
+               placeholder="Descripción o categoría">
+      </div>
+      <div class="col-md-2">
+        <label for="tipo" class="form-label mb-1">Tipo</label>
+        <select id="tipo" name="tipo" class="form-select">
+          <option value="">Todos</option>
+          <option value="Ingreso" th:selected="${tipo == 'Ingreso'}">Ingreso</option>
+          <option value="Gasto" th:selected="${tipo == 'Gasto'}">Gasto</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="desde" class="form-label mb-1">Desde</label>
+        <input type="date" id="desde" name="desde" th:value="${desde}" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <label for="hasta" class="form-label mb-1">Hasta</label>
+        <input type="date" id="hasta" name="hasta" th:value="${hasta}" class="form-control">
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-dark flex-grow-1">Filtrar</button>
+        <a th:if="${filtrado}" th:href="@{/movimientos}" class="btn btn-outline-dark">Limpiar</a>
+      </div>
+    </form>
 
     <div th:if="${ok}" class="alert alert-success" th:text="${ok}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
@@ -48,16 +65,20 @@
             </td>
             <td class="text-end"
                 th:text="${'$ ' + #numbers.formatDecimal(m.monto, 1, 'POINT', 0, 'COMMA')}">$ 0</td>
-            <td class="text-end">
-              <form th:action="@{/movimientos/{id}/eliminar(id=${m.idMovimiento})}" method="post"
-                    class="m-0" onsubmit="return confirm('¿Eliminar este movimiento?');">
-                <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-              </form>
+            <td>
+              <div class="d-flex gap-2 justify-content-end">
+                <a th:href="@{/movimientos/{id}/editar(id=${m.idMovimiento})}"
+                   class="btn btn-sm btn-outline-dark">Editar</a>
+                <form th:action="@{/movimientos/{id}/eliminar(id=${m.idMovimiento})}" method="post"
+                      class="m-0" onsubmit="return confirm('¿Eliminar este movimiento?');">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                </form>
+              </div>
             </td>
           </tr>
           <tr th:if="${#lists.isEmpty(movimientos)}">
             <td colspan="6" class="text-center text-secondary py-4"
-                th:text="${#strings.isEmpty(q)} ? 'No hay movimientos todavía.' : 'No se encontraron movimientos con esa búsqueda.'">
+                th:text="${filtrado} ? 'No se encontraron movimientos con esos filtros.' : 'No hay movimientos todavía.'">
               No hay movimientos todavía.
             </td>
           </tr>

@@ -15,6 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/inicio",
                         "/movimientos", "/movimientos/**",
                         "/ingresar", "/gastos",
-                        "/categorias", "/categorias/**");
+                        "/categorias", "/categorias/**",
+                        "/estadistica");
     }
 }

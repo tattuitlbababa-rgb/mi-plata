@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabecera('Estadística')}"></head>
+<body>
+<div class="contenedor-app">
+  <nav th:replace="~{fragments/layout :: barra}"></nav>
+
+  <main class="p-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
+      <div>
+        <h1 class="h3 fw-bold mb-0">ESTADÍSTICA</h1>
+        <p class="mb-0">Ver en qué gastás</p>
+      </div>
+
+      <form th:action="@{/estadistica}" method="get">
+        <label for="mes" class="form-label mb-1">Período</label>
+        <select id="mes" name="mes" class="form-select" onchange="this.form.submit()">
+          <option value="">Todos los meses</option>
+          <option th:each="m : ${meses}" th:value="${m}" th:selected="${m == mes}"
+                  th:text="${#strings.substring(m, 5, 7) + '/' + #strings.substring(m, 0, 4)}">11/2026</option>
+        </select>
+        <noscript><button type="submit" class="btn btn-dark mt-2">Ver</button></noscript>
+      </form>
+    </div>
+
+    <!-- Tarjetas de resumen -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6">
+        <div class="card text-center h-100"><div class="card-body">
+          <p class="mb-1 fw-bold">Ingresos</p>
+          <p class="fs-4 fw-bold mb-0 tipo-ingreso"
+             th:text="${'$ ' + #numbers.formatDecimal(resumen.ingresos, 1, 'POINT', 0, 'COMMA')}">$ 0</p>
+        </div></div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card text-center h-100"><div class="card-body">
+          <p class="mb-1 fw-bold">Gastos</p>
+          <p class="fs-4 fw-bold mb-0 tipo-gasto"
+             th:text="${'$ ' + #numbers.formatDecimal(resumen.gastos, 1, 'POINT', 0, 'COMMA')}">$ 0</p>
+        </div></div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card text-center h-100"><div class="card-body">
+          <p class="mb-1 fw-bold">Saldo disponible</p>
+          <p class="fs-4 fw-bold mb-0"
+             th:text="${'$ ' + #numbers.formatDecimal(resumen.saldo, 1, 'POINT', 0, 'COMMA')}">$ 0</p>
+        </div></div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card text-center h-100"><div class="card-body">
+          <p class="mb-1 fw-bold">Movimientos</p>
+          <p class="fs-4 fw-bold mb-0" th:text="${resumen.cantidad}">0</p>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- Gastos por categoría -->
+    <div class="bg-white p-3 mb-4">
+      <h2 class="h5 fw-bold">Gastos por categoría</h2>
+
+      <div th:each="f : ${resumen.gastosPorCategoria}" class="mb-3">
+        <div class="d-flex justify-content-between">
+          <span th:text="${f.nombre}">Comida</span>
+          <span>
+            <span th:text="${'$ ' + #numbers.formatDecimal(f.total, 1, 'POINT', 0, 'COMMA')}">$ 0</span>
+            <small class="text-secondary"
+                   th:text="${'(' + #numbers.formatDecimal(f.porcentaje, 1, 'NONE', 1, 'COMMA') + '%)'}">(0%)</small>
+          </span>
+        </div>
+        <div class="progress" style="height: 10px;">
+          <div class="progress-bar bg-danger" role="progressbar"
+               th:style="${'width: ' + #numbers.formatDecimal(f.porcentaje, 1, 'NONE', 1, 'POINT') + '%'}"></div>
+        </div>
+      </div>
+
+      <p th:if="${#lists.isEmpty(resumen.gastosPorCategoria)}" class="text-secondary mb-0">
+        Todavía no hay gastos para mostrar.
+      </p>
+    </div>
+
+    <!-- Los 3 gastos más altos -->
+    <div class="bg-white p-3" th:unless="${#lists.isEmpty(resumen.mayoresGastos)}">
+      <h2 class="h5 fw-bold">Tus 3 gastos más altos</h2>
+      <table class="table table-sm align-middle mb-0">
+        <tbody>
+          <tr th:each="m : ${resumen.mayoresGastos}">
+            <td th:text="${#temporals.format(m.fecha, 'dd/MM/yyyy')}">01/01/2026</td>
+            <td th:text="${m.descripcion}">Descripción</td>
+            <td th:text="${m.categoriaNombre}">Categoría</td>
+            <td class="text-end tipo-gasto"
+                th:text="${'$ ' + #numbers.formatDecimal(m.monto, 1, 'POINT', 0, 'COMMA')}">$ 0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body>
+</html>
