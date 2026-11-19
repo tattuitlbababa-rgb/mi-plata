@@ -15,6 +15,12 @@ public class InicioWebController {
         this.servicio = servicio;
     }
 
+    // La dirección raíz lleva al inicio (y si no hay sesión, el interceptor manda al login)
+    @GetMapping("/")
+    public String raiz() {
+        return "redirect:/inicio";
+    }
+
     @GetMapping("/inicio")
     public String inicio(@SessionAttribute(AuthWebController.SESION_USUARIO_ID) int usuarioId,
                          Model model) {

@@ -1,0 +1,30 @@
+CREATE DATABASE IF NOT EXISTS mi_plata CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE mi_plata;
+
+CREATE TABLE IF NOT EXISTS usuarios (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  dni VARCHAR(8) NOT NULL,
+  correo VARCHAR(150) NOT NULL UNIQUE,
+  clave_hash VARCHAR(255) NOT NULL,
+  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS categorias (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  nombre VARCHAR(60) NOT NULL,
+  tipo ENUM('Ingreso', 'Gasto') NOT NULL,
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS movimientos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  fecha DATE NOT NULL,
+  descripcion VARCHAR(150) NOT NULL,
+  categoria VARCHAR(60) NOT NULL,
+  tipo ENUM('Ingreso', 'Gasto') NOT NULL,
+  importe DECIMAL(12,2) NOT NULL,
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
